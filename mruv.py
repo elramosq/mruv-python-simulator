@@ -289,7 +289,6 @@ def resolver_mruv(datos):
 
 def obtener_datos():
     datos = {}
-<<<<<<< HEAD
 
     for clave, campo in campos.items():
         try:
@@ -518,198 +517,6 @@ def cargar_ejemplo():
     campos["a"].insert(0, "2")
     campos["t"].insert(0, "5")
 
-=======
-
-    for clave, campo in campos.items():
-        try:
-            datos[clave] = leer_numero(campo.get())
-        except ValueError:
-            raise ValueError(
-                f"El campo '{VARIABLES[clave][0]}' "
-                "contiene un número inválido."
-            )
-
-    return datos
-
-
-def mostrar_resultados(resultados, originales):
-    salida = []
-
-    for clave, (nombre, unidad) in VARIABLES.items():
-        valor = resultados[clave]
-
-        if valor is None:
-            estado = "No determinado"
-            salida.append(f"{nombre}: {estado}")
-
-        else:
-            if originales[clave] is not None:
-                estado = "Ingresado"
-            else:
-                estado = "Calculado"
-
-            salida.append(
-                f"{nombre}: {valor:.4f} {unidad} ({estado})"
-            )
-
-    caja_resultados.config(state="normal")
-    caja_resultados.delete("1.0", tk.END)
-    caja_resultados.insert(tk.END, "\n".join(salida))
-    caja_resultados.config(state="disabled")
-
-
-def calcular():
-    try:
-        datos = obtener_datos()
-    except ValueError as error:
-        messagebox.showerror("Error de entrada", str(error))
-        return
-
-    cantidad = sum(v is not None for v in datos.values())
-
-    if cantidad < 3:
-        messagebox.showwarning(
-            "Datos insuficientes",
-            "Introduce al menos tres variables conocidas."
-        )
-        return
-
-    errores = validar_datos(datos)
-
-    if errores:
-        messagebox.showerror(
-            "Datos incompatibles",
-            "\n\n".join(errores)
-        )
-        return
-
-    resultados, avisos, tiempos = resolver_mruv(datos)
-
-    mostrar_resultados(resultados, datos)
-
-    if avisos:
-        messagebox.showwarning(
-            "Información del cálculo",
-            "\n\n".join(avisos)
-        )
-
-    if all(
-        resultados[k] is not None
-        for k in ("v0", "a", "t")
-    ):
-        graficar(
-            resultados["v0"],
-            resultados["a"],
-            resultados["t"]
-        )
-    else:
-        limpiar_grafica()
-
-
-# ==========================================================
-# GRÁFICAS
-# ==========================================================
-
-def graficar(v0, a, t_final):
-    limpiar_grafica()
-
-    if t_final < 0:
-        return
-
-    tiempos = (
-        np.linspace(0, t_final, 200)
-        if t_final > 0
-        else np.array([0.0])
-    )
-
-    # Desplazamiento desde la posición inicial.
-    posicion = v0 * tiempos + 0.5 * a * tiempos**2
-
-    velocidad = v0 + a * tiempos
-    aceleracion = np.full_like(tiempos, a)
-
-    figura = Figure(figsize=(8, 7), dpi=100)
-    figura.patch.set_facecolor(COLORES["blanco"])
-
-    e1 = figura.add_subplot(311)
-    e2 = figura.add_subplot(312)
-    e3 = figura.add_subplot(313)
-
-    e1.plot(tiempos, posicion, linewidth=2, label="Desplazamiento")
-    e1.set_title("Desplazamiento frente al tiempo")
-    e1.set_ylabel("Desplazamiento (m)")
-    e1.grid(True, alpha=0.3)
-    e1.legend()
-
-    e2.plot(tiempos, velocidad, linewidth=2, label="Velocidad")
-    e2.set_title("Velocidad frente al tiempo")
-    e2.set_ylabel("Velocidad (m/s)")
-    e2.grid(True, alpha=0.3)
-    e2.legend()
-
-    e3.plot(tiempos, aceleracion, linewidth=2, label="Aceleración")
-    e3.set_title("Aceleración frente al tiempo")
-    e3.set_xlabel("Tiempo (s)")
-    e3.set_ylabel("Aceleración (m/s²)")
-    e3.grid(True, alpha=0.3)
-    e3.legend()
-
-    for eje in (e1, e2, e3):
-        eje.set_xlim(left=0)
-        eje.set_facecolor("#FAFCFF")
-
-    figura.tight_layout()
-
-    global lienzo_actual
-
-    lienzo_actual = FigureCanvasTkAgg(
-        figura,
-        master=marco_grafica
-    )
-
-    lienzo_actual.draw()
-
-    lienzo_actual.get_tk_widget().pack(
-        fill="both",
-        expand=True
-    )
-
-
-def limpiar_grafica():
-    global lienzo_actual
-
-    if lienzo_actual is not None:
-        lienzo_actual.get_tk_widget().destroy()
-        lienzo_actual = None
-
-
-# ==========================================================
-# BOTONES
-# ==========================================================
-
-def limpiar():
-    for campo in campos.values():
-        campo.delete(0, tk.END)
-
-    caja_resultados.config(state="normal")
-    caja_resultados.delete("1.0", tk.END)
-    caja_resultados.insert(
-        tk.END,
-        "Introduce los datos y pulsa Calcular."
-    )
-    caja_resultados.config(state="disabled")
-
-    limpiar_grafica()
-
-
-def cargar_ejemplo():
-    limpiar()
-
-    campos["v0"].insert(0, "4")
-    campos["a"].insert(0, "2")
-    campos["t"].insert(0, "5")
-
->>>>>>> b69ee6c72e5ac3b278cd076d297bb01d0c87b68d
     calcular()
 
 
@@ -719,13 +526,8 @@ def cargar_ejemplo():
 
 ventana = tk.Tk()
 ventana.title("Simulador interactivo de MRUV")
-<<<<<<< HEAD
 ventana.geometry("1200x850")
 ventana.minsize(1000, 750)
-=======
-ventana.geometry("1150x850")
-ventana.minsize(900, 650)
->>>>>>> b69ee6c72e5ac3b278cd076d297bb01d0c87b68d
 ventana.configure(bg=COLORES["fondo"])
 
 estilo = ttk.Style()
@@ -806,16 +608,12 @@ ttk.Label(
 ).pack(pady=(0, 15))
 
 panel = ttk.Frame(contenedor)
-<<<<<<< HEAD
 panel.pack(fill="both", expand=True)
 
 panel.columnconfigure(0, weight=0)
 panel.columnconfigure(1, weight=1)
 panel.columnconfigure(2, weight=2)
 panel.rowconfigure(0, weight=1)
-=======
-panel.pack(fill="x")
->>>>>>> b69ee6c72e5ac3b278cd076d297bb01d0c87b68d
 
 marco_entrada = ttk.LabelFrame(
     panel,
@@ -823,17 +621,10 @@ marco_entrada = ttk.LabelFrame(
     padding=12
 )
 
-<<<<<<< HEAD
 marco_entrada.grid(
     row=0, column=0,
     sticky="ns",
     padx=(0, 8)
-=======
-marco_entrada.pack(
-    side="left",
-    fill="y",
-    padx=(0, 12)
->>>>>>> b69ee6c72e5ac3b278cd076d297bb01d0c87b68d
 )
 
 campos = {}
@@ -919,26 +710,15 @@ marco_resultados = ttk.LabelFrame(
     padding=12
 )
 
-<<<<<<< HEAD
 marco_resultados.grid(
     row=0, column=1,
     sticky="nsew",
     padx=8
-=======
-marco_resultados.pack(
-    side="left",
-    fill="both",
-    expand=True
->>>>>>> b69ee6c72e5ac3b278cd076d297bb01d0c87b68d
 )
 
 caja_resultados = tk.Text(
     marco_resultados,
-<<<<<<< HEAD
     height=7,
-=======
-    height=13,
->>>>>>> b69ee6c72e5ac3b278cd076d297bb01d0c87b68d
     wrap="word",
     font=("Consolas", 10),
     bg=COLORES["blanco"],
@@ -958,33 +738,18 @@ caja_resultados.insert(
 caja_resultados.config(state="disabled")
 
 marco_grafica = ttk.LabelFrame(
-<<<<<<< HEAD
     panel,
-=======
-    contenedor,
->>>>>>> b69ee6c72e5ac3b278cd076d297bb01d0c87b68d
     text="Visualización gráfica del movimiento",
     padding=8
 )
 
-<<<<<<< HEAD
 marco_grafica.grid(
     row=0,
     column=2,
     sticky="nsew",
     padx=(8, 0)
-=======
-marco_grafica.pack(
-    fill="both",
-    expand=True,
-    pady=(15, 0)
->>>>>>> b69ee6c72e5ac3b278cd076d297bb01d0c87b68d
 )
 
 lienzo_actual = None
 
-<<<<<<< HEAD
 ventana.mainloop()
-=======
-ventana.mainloop()
->>>>>>> b69ee6c72e5ac3b278cd076d297bb01d0c87b68d
